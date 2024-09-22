@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PointServiceImpl implements PointService {
 
-    private final PointHistoryRepository pointHistoryRepository;
     private final UserPointRepository userPointRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
 
     @Override
