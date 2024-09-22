@@ -22,8 +22,8 @@ public record UserPoint(
      * @return 충전 후 사용자 포인트
      */
     public UserPoint charge(final long amount) {
-        if (amount < 0) {
-            throw new IllegalArgumentException("충전할 포인트는 0 이상이어야 합니다.");
+        if (amount <= 0) {
+            throw new IllegalArgumentException("충전할 포인트는 0보다 커야 합니다.");
         }
         return new UserPoint(this.id, this.point + amount, System.currentTimeMillis());
     }
