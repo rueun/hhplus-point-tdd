@@ -6,7 +6,25 @@ public record UserPoint(
         long updateMillis
 ) {
 
-    public static UserPoint empty(long id) {
+    /**
+     * 사용자 포인트를 생성한다.
+     * @param id 사용자 ID
+     * @return 새로 생성된 사용자 포인트
+     */
+    public static UserPoint empty(final long id) {
         return new UserPoint(id, 0, System.currentTimeMillis());
+    }
+
+    /**
+     * 포인트를 충전한다.
+     *
+     * @param amount 충전할 포인트 양
+     * @return 충전 후 사용자 포인트
+     */
+    public UserPoint charge(final long amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("충전할 포인트는 0 이상이어야 합니다.");
+        }
+        return new UserPoint(this.id, this.point + amount, System.currentTimeMillis());
     }
 }
