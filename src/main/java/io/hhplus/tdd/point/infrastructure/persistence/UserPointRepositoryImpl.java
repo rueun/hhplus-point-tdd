@@ -6,6 +6,8 @@ import io.hhplus.tdd.point.domain.repository.UserPointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Objects;
+
 @Repository
 @RequiredArgsConstructor
 public class UserPointRepositoryImpl implements UserPointRepository {
@@ -18,6 +20,9 @@ public class UserPointRepositoryImpl implements UserPointRepository {
      */
     @Override
     public UserPoint save(final UserPoint userPoint) {
+        if (Objects.isNull(userPoint)) {
+            throw new IllegalArgumentException("userPoint is null");
+        }
         return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
     }
 
