@@ -14,6 +14,7 @@ public class DefaultUserPointPolicyService implements UserPointPolicyService {
      * @param userPoint 사용자 포인트
      * @param amount 충전할 포인트
      * @throws IllegalArgumentException 충전할 포인트가 0보다 작거나 최소 충전 포인트보다 작은 경우
+     * @throws IllegalArgumentException 충전할 포인트가 1,000원 단위가 아닌 경우
      * @throws IllegalArgumentException 최대 잔고를 초과하는 경우
      */
     @Override
@@ -32,6 +33,30 @@ public class DefaultUserPointPolicyService implements UserPointPolicyService {
 
         if (userPoint.point() + amount > MAX_POINT) {
             throw new IllegalArgumentException("최대 잔고를 초과할 수 없습니다.");
+        }
+    }
+
+
+    /**
+     * 사용할 포인트를 검증한다.
+     * @param userPoint 사용자 포인트
+     * @param amount 사용할 포인트
+     * @throws IllegalArgumentException 사용할 포인트가 0 이하인 경우
+     * @throws IllegalArgumentException 사용할 포인트가 1,000원 단위가 아닌 경우
+     * @throws IllegalArgumentException 잔고가 부족한 경우
+     */
+    @Override
+    public void validateUse(final UserPoint userPoint, final long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("사용할 포인트는 0보다 커야 합니다.");
+        }
+
+        if (amount % AMOUNT_UNIT != 0) {
+            throw new IllegalArgumentException("사용할 포인트는 1,000원 단위로 가능합니다.");
+        }
+
+        if (userPoint.point() < amount) {
+            throw new IllegalArgumentException("잔고가 부족합니다.");
         }
     }
 }
