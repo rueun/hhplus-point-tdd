@@ -81,4 +81,55 @@ class DefaultUserPointPolicyServiceTest {
                 () -> userPointPolicyService.validateCharge(userPoint, amount));
         assert exception.getMessage().contains("최대 잔고를 초과할 수 없습니다.");
     }
+
+
+    @ParameterizedTest
+    @ValueSource(longs = {1000L, 10000L})
+    @DisplayName("사용자 포인트를 사용할 수 있다.")
+    void testValidateUse_Success(long amount) {
+        // Given
+        UserPoint userPoint = new UserPoint(1L, 10000L, System.currentTimeMillis());
+
+        // When & Then: 예외가 발생하지 않는지 검증
+        assertDoesNotThrow(() -> userPointPolicyService.validateUse(userPoint, amount));
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {-1L, 0L})
+    @DisplayName("0 이하의 포인트는 사용할 수 없다.")
+    void testValidateUse_Fail_AmountIsZeroOrNegative(long amount) {
+        // Given
+        UserPoint userPoint = new UserPoint(1L, 50000L, System.currentTimeMillis());
+
+        // When & Then
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> userPointPolicyService.validateUse(userPoint, amount));
+        assert exception.getMessage().contains("사용할 포인트는 0보다 커야 합니다.");
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {1001L, 1009L})
+    @DisplayName("사용할 포인트는 1,000원 단위로 가능하다.")
+    void testValidateUse_Fail_AmountNotMultipleOfUnit(long amount) {
+        // Given
+        UserPoint userPoint = new UserPoint(1L, 50000L, System.currentTimeMillis());
+
+        // When & Then
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> userPointPolicyService.validateUse(userPoint, amount));
+        assert exception.getMessage().contains("사용할 포인트는 1,000원 단위로 가능합니다.");
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {6000L, 10000L})
+    @DisplayName("잔고가 부족한 경우 포인트를 사용할 수 없다.")
+    void testValidateUse_Fail_NotEnoughBalance(long amount) {
+        // Given
+        UserPoint userPoint = new UserPoint(1L, 5000L, System.currentTimeMillis());
+
+        // When & Then
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> userPointPolicyService.validateUse(userPoint, amount));
+        assert exception.getMessage().contains("잔고가 부족합니다.");
+    }
 }
