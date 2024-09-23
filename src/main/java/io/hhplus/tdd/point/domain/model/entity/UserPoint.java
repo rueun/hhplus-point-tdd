@@ -28,4 +28,15 @@ public record UserPoint(
         pointPolicyService.validateCharge(this, amount);
         return new UserPoint(this.id, this.point + amount, System.currentTimeMillis());
     }
+
+    /**
+     * 사용자 포인트를 사용한다.
+     * @param pointPolicyService 포인트 정책 도메인 서비스
+     * @param amount 사용할 포인트
+     * @return 사용된 사용자 포인트
+     */
+    public UserPoint use(final UserPointPolicyService pointPolicyService, final long amount) {
+        pointPolicyService.validateUse(this, amount);
+        return new UserPoint(this.id, this.point - amount, System.currentTimeMillis());
+    }
 }

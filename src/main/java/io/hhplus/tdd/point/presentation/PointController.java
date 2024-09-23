@@ -1,9 +1,11 @@
 package io.hhplus.tdd.point.presentation;
 
+import io.hhplus.tdd.point.application.dto.UseUserPointCommand;
 import io.hhplus.tdd.point.application.service.PointService;
 import io.hhplus.tdd.point.domain.model.entity.PointHistory;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.presentation.dto.ChargeUserPointRequest;
+import io.hhplus.tdd.point.presentation.dto.UseUserPointRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,14 +53,12 @@ public class PointController {
         return ok(pointService.charge(request.toCommand(id)));
     }
 
-    /**
-     * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
-     */
+
     @PatchMapping("{id}/use")
-    public UserPoint use(
-            @PathVariable long id,
-            @RequestBody long amount
+    public ResponseEntity<UserPoint> use(
+            @PathVariable("id") long id,
+            @RequestBody UseUserPointRequest request
     ) {
-        return new UserPoint(0, 0, 0);
+        return ok(pointService.use(request.toCommand(id)));
     }
 }

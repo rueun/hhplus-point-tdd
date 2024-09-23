@@ -1,6 +1,7 @@
 package io.hhplus.tdd.point.application.service;
 
 import io.hhplus.tdd.point.application.dto.ChargeUserPointCommand;
+import io.hhplus.tdd.point.application.dto.UseUserPointCommand;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.domain.model.vo.TransactionType;
 import io.hhplus.tdd.point.domain.repository.PointHistoryRepository;
@@ -25,5 +26,14 @@ public class PointServiceImpl implements PointService {
         userPointRepository.save(chargedPoint);
         pointHistoryRepository.insert(command.getUserId(), command.getAmount(), TransactionType.CHARGE, chargedPoint.updateMillis());
         return chargedPoint;
+    }
+
+    @Override
+    public UserPoint use(final UseUserPointCommand command) {
+        final UserPoint userPoint = userPointRepository.findByUserId(command.getUserId());
+        final UserPoint usedPoint = userPoint.use(userPointPolicyService, command.getAmount());
+        userPointRepository.save(usedPoint);
+        pointHistoryRepository.insert(command.getUserId(), command.getAmount(), TransactionType.USE, usedPoint.updateMillis());
+        return usedPoint;
     }
 }
