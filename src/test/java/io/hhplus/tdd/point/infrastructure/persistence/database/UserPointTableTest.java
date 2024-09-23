@@ -1,12 +1,12 @@
-package io.hhplus.tdd.database;
+package io.hhplus.tdd.point.infrastructure.persistence.database;
 
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
-import io.hhplus.tdd.point.infrastructure.persistence.database.UserPointTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class UserPointTableTest {
 

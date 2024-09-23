@@ -1,8 +1,7 @@
-package io.hhplus.tdd.point.infrastructure.persistence;
+package io.hhplus.tdd.point.infrastructure.persistence.repository;
 
-import io.hhplus.tdd.point.infrastructure.persistence.database.UserPointTable;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
-import io.hhplus.tdd.point.infrastructure.persistence.repository.UserPointRepositoryImpl;
+import io.hhplus.tdd.point.infrastructure.persistence.database.UserPointTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,8 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
@@ -81,6 +79,9 @@ class UserPointRepositoryImplTest {
         UserPoint foundUserPoint = userPointRepository.findByUserId(1);
 
         // then
-        assertEquals(UserPoint.empty(1), foundUserPoint);
+        assertAll(
+                () -> assertNotNull(foundUserPoint),
+                () -> assertEquals(1, foundUserPoint.id()),
+                () -> assertEquals(0, foundUserPoint.point()));
     }
 }
