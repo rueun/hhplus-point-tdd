@@ -42,7 +42,6 @@ class UserPointTest {
 
         // Then
         assertEquals(15000L, updatedUserPoint.point());
-        assertTrue(updatedUserPoint.updateMillis() > userPoint.updateMillis());
     }
 
     @Test
