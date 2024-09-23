@@ -1,15 +1,18 @@
 package io.hhplus.tdd.point.presentation;
 
-import io.hhplus.tdd.point.application.dto.ChargeUserPointCommand;
 import io.hhplus.tdd.point.application.service.PointService;
 import io.hhplus.tdd.point.domain.model.entity.PointHistory;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
+import io.hhplus.tdd.point.presentation.dto.ChargeUserPointRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RequiredArgsConstructor
 @RestController
@@ -41,11 +44,11 @@ public class PointController {
 
 
     @PatchMapping("{id}/charge")
-    public UserPoint charge(
-            @PathVariable long id,
-            @RequestBody long amount
+    public ResponseEntity<UserPoint> charge(
+            @PathVariable("id") long id,
+            @RequestBody ChargeUserPointRequest request
     ) {
-        return pointService.charge(ChargeUserPointCommand.of(id, amount));
+        return ok(pointService.charge(request.toCommand(id)));
     }
 
     /**

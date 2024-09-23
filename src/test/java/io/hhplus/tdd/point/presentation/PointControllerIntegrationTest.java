@@ -39,7 +39,7 @@ class PointControllerIntegrationTest {
         // when & then
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.valueOf(10000L)))
+                        .content("{\"amount\": 10000}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.point").value(10_500L));
@@ -56,7 +56,7 @@ class PointControllerIntegrationTest {
         // when & then
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("-100"))
+                        .content("{\"amount\": -100}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof IllegalArgumentException))
                 .andExpect(result -> assertEquals("충전할 포인트는 0보다 커야 합니다.", result.getResolvedException().getMessage()));
@@ -71,7 +71,7 @@ class PointControllerIntegrationTest {
         // when & then
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("1001"))
+                        .content("{\"amount\": 1001}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof IllegalArgumentException))
                 .andExpect(result -> assertEquals("충전할 포인트는 1,000원 단위로 가능합니다.", result.getResolvedException().getMessage()));
@@ -86,7 +86,7 @@ class PointControllerIntegrationTest {
         // when & then
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("9000"))
+                        .content("{\"amount\": 9000}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof IllegalArgumentException))
                 .andExpect(result -> assertEquals("최소 충전 금액은 10,000원입니다.", result.getResolvedException().getMessage()));
@@ -101,7 +101,7 @@ class PointControllerIntegrationTest {
         // when & then
         mockMvc.perform(patch("/point/{id}/charge", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("21000"))
+                        .content("{\"amount\": 21000}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof IllegalArgumentException))
                 .andExpect(result -> assertEquals("최대 잔고를 초과할 수 없습니다.", result.getResolvedException().getMessage()));
