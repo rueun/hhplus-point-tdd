@@ -1,4 +1,4 @@
-package io.hhplus.tdd.database;
+package io.hhplus.tdd.point.infrastructure.persistence.database;
 
 
 import io.hhplus.tdd.point.domain.model.entity.PointHistory;

@@ -1,6 +1,6 @@
-package io.hhplus.tdd.point.infrastructure.persistence;
+package io.hhplus.tdd.point.infrastructure.persistence.repository;
 
-import io.hhplus.tdd.database.PointHistoryTable;
+import io.hhplus.tdd.point.infrastructure.persistence.database.PointHistoryTable;
 import io.hhplus.tdd.point.domain.model.entity.PointHistory;
 import io.hhplus.tdd.point.domain.model.vo.TransactionType;
 import io.hhplus.tdd.point.domain.repository.PointHistoryRepository;

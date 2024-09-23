@@ -1,6 +1,6 @@
-package io.hhplus.tdd.point.infrastructure.persistence;
+package io.hhplus.tdd.point.infrastructure.persistence.repository;
 
-import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.infrastructure.persistence.database.UserPointTable;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.domain.repository.UserPointRepository;
 import lombok.RequiredArgsConstructor;

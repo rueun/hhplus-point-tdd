@@ -1,7 +1,8 @@
 package io.hhplus.tdd.point.infrastructure.persistence;
 
-import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.point.infrastructure.persistence.database.UserPointTable;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
+import io.hhplus.tdd.point.infrastructure.persistence.repository.UserPointRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
