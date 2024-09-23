@@ -25,18 +25,18 @@ public class PointController {
 
 
     @GetMapping("{id}")
-    public UserPoint point(
+    public ResponseEntity<UserPoint> point(
             @PathVariable("id") long id
     ) {
-        return pointService.getUserPointByUserId(id);
+        return ok(pointService.getUserPointByUserId(id));
     }
 
 
     @GetMapping("{id}/histories")
-    public List<PointHistory> history(
+    public ResponseEntity<List<PointHistory>> history(
             @PathVariable("id") long id
     ) {
-        return pointService.getHistoriesByUserId(id);
+        return ok(pointService.getHistoriesByUserId(id));
     }
 
 
