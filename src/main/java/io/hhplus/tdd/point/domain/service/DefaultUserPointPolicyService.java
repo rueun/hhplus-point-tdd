@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultUserPointPolicyService implements UserPointPolicyService {
-    private static final long MIN_AMOUNT = 10000L;
+    private static final long MIN_AMOUNT = 10_000L;
     private static final long MAX_POINT = 1_000_000L;
+    private static final long AMOUNT_UNIT = 1_000L;
 
     /**
      * 충전할 포인트를 검증한다.
@@ -19,6 +20,10 @@ public class DefaultUserPointPolicyService implements UserPointPolicyService {
     public void validateCharge(final UserPoint userPoint, final long amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("충전할 포인트는 0보다 커야 합니다.");
+        }
+
+        if (amount % AMOUNT_UNIT != 0) {
+            throw new IllegalArgumentException("충전할 포인트는 1,000원 단위로 가능합니다.");
         }
 
         if (amount < MIN_AMOUNT) {
