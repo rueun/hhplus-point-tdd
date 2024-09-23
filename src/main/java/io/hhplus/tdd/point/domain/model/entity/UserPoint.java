@@ -1,5 +1,7 @@
 package io.hhplus.tdd.point.domain.model.entity;
 
+import io.hhplus.tdd.point.domain.service.UserPointPolicyService;
+
 public record UserPoint(
         long id,
         long point,
@@ -15,16 +17,15 @@ public record UserPoint(
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
 
+
     /**
-     * 포인트를 충전한다.
-     *
-     * @param amount 충전할 포인트 양
-     * @return 충전 후 사용자 포인트
+     * 사용자 포인트를 충전한다.
+     * @param pointPolicyService 포인트 정책 도메인 서비스
+     * @param amount 충전할 포인트
+     * @return 충전된 사용자 포인트
      */
-    public UserPoint charge(final long amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("충전할 포인트는 0보다 커야 합니다.");
-        }
+    public UserPoint charge(final UserPointPolicyService pointPolicyService, final long amount) {
+        pointPolicyService.validateCharge(this, amount);
         return new UserPoint(this.id, this.point + amount, System.currentTimeMillis());
     }
 }
