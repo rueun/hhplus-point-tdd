@@ -7,7 +7,6 @@ import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.domain.model.vo.TransactionType;
 import io.hhplus.tdd.point.domain.repository.PointHistoryRepository;
 import io.hhplus.tdd.point.domain.repository.UserPointRepository;
-import io.hhplus.tdd.point.domain.service.UserPointPolicyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +28,6 @@ class PointServiceImplTest {
     @Mock
     private PointHistoryRepository pointHistoryRepository;
 
-    @Mock
-    private UserPointPolicyService userPointPolicyService;
-
     @InjectMocks
     private PointServiceImpl pointService;
 
@@ -52,8 +48,7 @@ class PointServiceImplTest {
                 () -> assertEquals(1L, chargedPoint.id()),
                 () -> assertEquals(30000L, chargedPoint.point()),
                 () -> verify(userPointRepository).save(chargedPoint),
-                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.CHARGE, chargedPoint.updateMillis()),
-                () -> verify(userPointPolicyService).validateCharge(userPoint, 10000L)
+                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.CHARGE, chargedPoint.updateMillis())
         );
     }
 
@@ -65,18 +60,18 @@ class PointServiceImplTest {
         long userId = 1L;
         long invalidAmount = -1000L;
         ChargeUserPointCommand command = ChargeUserPointCommand.of(userId, invalidAmount);
-        UserPoint userPoint = new UserPoint(userId, 20000L, System.currentTimeMillis());
+        UserPoint userPoint = mock(UserPoint.class);
 
         when(userPointRepository.findByUserId(userId)).thenReturn(userPoint);
         doThrow(new IllegalArgumentException("최소 충전 금액은 10,000원입니다."))
-                .when(userPointPolicyService).validateCharge(userPoint, invalidAmount);
+                .when(userPoint).charge(invalidAmount);
 
 
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pointService.charge(command));
         assertEquals("최소 충전 금액은 10,000원입니다.", exception.getMessage());
         verify(userPointRepository).findByUserId(userId);
-        verify(userPointPolicyService).validateCharge(userPoint, invalidAmount);
+        verify(userPoint).charge(invalidAmount);
         verifyNoMoreInteractions(userPointRepository, pointHistoryRepository);
     }
 
@@ -96,8 +91,7 @@ class PointServiceImplTest {
                 () -> assertEquals(1L, usedPoint.id()),
                 () -> assertEquals(10000L, usedPoint.point()),
                 () -> verify(userPointRepository).save(usedPoint),
-                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.USE, usedPoint.updateMillis()),
-                () -> verify(userPointPolicyService).validateUse(userPoint, 10000L)
+                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.USE, usedPoint.updateMillis())
         );
     }
 
@@ -109,17 +103,17 @@ class PointServiceImplTest {
         long userId = 1L;
         long invalidAmount = -1000L;
         UseUserPointCommand command = UseUserPointCommand.of(userId, invalidAmount);
-        UserPoint userPoint = new UserPoint(userId, 20000L, System.currentTimeMillis());
+        UserPoint userPoint = mock(UserPoint.class);
 
         when(userPointRepository.findByUserId(userId)).thenReturn(userPoint);
         doThrow(new IllegalArgumentException("사용할 포인트는 0보다 커야 합니다."))
-                .when(userPointPolicyService).validateUse(userPoint, invalidAmount);
+                .when(userPoint).use(invalidAmount);
 
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pointService.use(command));
         assertEquals("사용할 포인트는 0보다 커야 합니다.", exception.getMessage());
         verify(userPointRepository).findByUserId(userId);
-        verify(userPointPolicyService).validateUse(userPoint, invalidAmount);
+        verify(userPoint).use(invalidAmount);
         verifyNoMoreInteractions(userPointRepository, pointHistoryRepository);
     }
 

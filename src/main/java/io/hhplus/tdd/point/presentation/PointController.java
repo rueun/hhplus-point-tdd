@@ -4,7 +4,9 @@ import io.hhplus.tdd.point.application.service.PointService;
 import io.hhplus.tdd.point.domain.model.entity.PointHistory;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.presentation.dto.ChargeUserPointRequest;
+import io.hhplus.tdd.point.presentation.dto.PointHistoryResponse;
 import io.hhplus.tdd.point.presentation.dto.UseUserPointRequest;
+import io.hhplus.tdd.point.presentation.dto.UserPointResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,40 +22,45 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequestMapping("/point")
 public class PointController {
 
-    private static final Logger log = LoggerFactory.getLogger(PointController.class);
     private final PointService pointService;
 
 
     @GetMapping("{id}")
-    public ResponseEntity<UserPoint> point(
+    public ResponseEntity<UserPointResponse> point(
             @PathVariable("id") long id
     ) {
-        return ok(pointService.getUserPointByUserId(id));
+        final UserPoint userPoint = pointService.getUserPointByUserId(id);
+        return ok(UserPointResponse.of(userPoint));
     }
 
 
     @GetMapping("{id}/histories")
-    public ResponseEntity<List<PointHistory>> history(
+    public ResponseEntity<List<PointHistoryResponse>> history(
             @PathVariable("id") long id
     ) {
-        return ok(pointService.getHistoriesByUserId(id));
+
+        final List<PointHistory> pointHistories = pointService.getHistoriesByUserId(id);
+        return ok(pointHistories.stream()
+                .map(PointHistoryResponse::of).toList());
     }
 
 
     @PatchMapping("{id}/charge")
-    public ResponseEntity<UserPoint> charge(
+    public ResponseEntity<UserPointResponse> charge(
             @PathVariable("id") long id,
             @RequestBody ChargeUserPointRequest request
     ) {
-        return ok(pointService.charge(request.toCommand(id)));
+        final UserPoint userPoint = pointService.charge(request.toCommand(id));
+        return ok(UserPointResponse.of(userPoint));
     }
 
 
     @PatchMapping("{id}/use")
-    public ResponseEntity<UserPoint> use(
+    public ResponseEntity<UserPointResponse> use(
             @PathVariable("id") long id,
             @RequestBody UseUserPointRequest request
     ) {
-        return ok(pointService.use(request.toCommand(id)));
+        final UserPoint userPoint = pointService.use(request.toCommand(id));
+        return ok(UserPointResponse.of(userPoint));
     }
 }
