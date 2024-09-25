@@ -22,7 +22,6 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequestMapping("/point")
 public class PointController {
 
-    private static final Logger log = LoggerFactory.getLogger(PointController.class);
     private final PointService pointService;
 
 
