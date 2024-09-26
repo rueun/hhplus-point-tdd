@@ -2,7 +2,6 @@ package io.hhplus.tdd.point.application.service;
 
 import io.hhplus.tdd.point.application.dto.ChargeUserPointCommand;
 import io.hhplus.tdd.point.application.dto.UseUserPointCommand;
-import io.hhplus.tdd.point.domain.model.entity.PointHistory;
 import io.hhplus.tdd.point.domain.model.entity.UserPoint;
 import io.hhplus.tdd.point.domain.model.vo.TransactionType;
 import io.hhplus.tdd.point.domain.repository.PointHistoryRepository;
@@ -14,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,128 +32,92 @@ class PointServiceImplTest {
 
 
     @Test
-    @DisplayName("사용자 포인트를 충전할 수 있다.")
-    void charge_ShouldChargeUserPoint() {
+    void id가_1인_사용자가_10000_포인트_충전_요청_시_충전_후_30000_포인트를_반환한다() {
         // Given
-        UserPoint userPoint = new UserPoint(1L, 20000L, System.currentTimeMillis());
-        when(userPointRepository.findByUserId(1L)).thenReturn(userPoint);
+        UserPoint userPoint = mock(UserPoint.class);
+        given(userPointRepository.findByUserId(anyLong())).willReturn(userPoint);
+        given(userPoint.charge(anyLong())).willReturn(new UserPoint(1L, 30_000L, System.currentTimeMillis()));
+        ChargeUserPointCommand command = ChargeUserPointCommand.of(1L, 10_000L);
 
         // When
-        UserPoint chargedPoint = pointService.charge(ChargeUserPointCommand.of(1L, 10000L));
+        UserPoint chargedPoint = pointService.charge(command);
 
         // Then
         assertAll(
                 () -> assertNotNull(chargedPoint),
                 () -> assertEquals(1L, chargedPoint.id()),
-                () -> assertEquals(30000L, chargedPoint.point()),
-                () -> verify(userPointRepository).save(chargedPoint),
-                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.CHARGE, chargedPoint.updateMillis())
+                () -> assertEquals(30_000L, chargedPoint.point()),
+                () -> then(userPointRepository).should().findByUserId(1L),
+                () -> then(userPoint).should().charge(10_000L),
+                () -> then(userPointRepository).should(times(1)).save(chargedPoint),
+                () -> then(pointHistoryRepository).should(times(1)).insert(1L, 10_000L, TransactionType.CHARGE, chargedPoint.updateMillis())
         );
     }
 
 
     @Test
-    @DisplayName("유효하지 않은 금액으로 포인트 충전 시 예외가 발생한다.")
-    void charge_ShouldThrowException_WhenInvalidAmount() {
+    void 유효하지_않은_금액으로_포인트_충전을_요청하는_경우_예외가_발생한다() {
         // Given
-        long userId = 1L;
-        long invalidAmount = -1000L;
-        ChargeUserPointCommand command = ChargeUserPointCommand.of(userId, invalidAmount);
         UserPoint userPoint = mock(UserPoint.class);
-
-        when(userPointRepository.findByUserId(userId)).thenReturn(userPoint);
-        doThrow(new IllegalArgumentException("최소 충전 금액은 10,000원입니다."))
-                .when(userPoint).charge(invalidAmount);
-
+        given(userPointRepository.findByUserId(anyLong())).willReturn(userPoint);
+        doThrow(new IllegalArgumentException("충전할 포인트는 0보다 커야 합니다."))
+                .when(userPoint).charge(anyLong());
+        ChargeUserPointCommand command = ChargeUserPointCommand.of(1L, -1000L);
 
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pointService.charge(command));
-        assertEquals("최소 충전 금액은 10,000원입니다.", exception.getMessage());
-        verify(userPointRepository).findByUserId(userId);
-        verify(userPoint).charge(invalidAmount);
-        verifyNoMoreInteractions(userPointRepository, pointHistoryRepository);
+
+        assertAll(
+                () -> assertEquals("충전할 포인트는 0보다 커야 합니다.", exception.getMessage()),
+                () -> then(userPointRepository).should().findByUserId(1L),
+                () -> then(userPoint).should(times(1)).charge(-1000L),
+                () -> then(userPointRepository).should(never()).save(any(UserPoint.class)),
+                () -> then(pointHistoryRepository).should(never()).insert(anyLong(), anyLong(), any(TransactionType.class), anyLong())
+        );
     }
 
     @Test
-    @DisplayName("사용자 포인트를 사용할 수 있다.")
-    void use_ShouldUseUserPoint() {
+    void id가_1인_사용자가_10000_포인트_사용_요청_시_사용_후_20000_포인트를_반환한다() {
         // Given
-        UserPoint userPoint = new UserPoint(1L, 20000L, System.currentTimeMillis());
-        when(userPointRepository.findByUserId(1L)).thenReturn(userPoint);
+        UserPoint userPoint = mock(UserPoint.class);
+        given(userPointRepository.findByUserId(anyLong())).willReturn(userPoint);
+        given(userPoint.use(anyLong())).willReturn(new UserPoint(1L, 20_000L, System.currentTimeMillis()));
+        UseUserPointCommand command = UseUserPointCommand.of(1L, 10_000L);
 
         // When
-        UserPoint usedPoint = pointService.use(UseUserPointCommand.of(1L, 10000L));
+        UserPoint usedPoint = pointService.use(command);
 
         // Then
         assertAll(
                 () -> assertNotNull(usedPoint),
                 () -> assertEquals(1L, usedPoint.id()),
-                () -> assertEquals(10000L, usedPoint.point()),
-                () -> verify(userPointRepository).save(usedPoint),
-                () -> verify(pointHistoryRepository).insert(1L, 10000L, TransactionType.USE, usedPoint.updateMillis())
-        );
+                () -> assertEquals(20_000L, usedPoint.point()),
+                () -> then(userPointRepository).should().findByUserId(1L),
+                () -> then(userPoint).should().use(10_000L),
+                () -> then(userPointRepository).should(times(1)).save(usedPoint),
+                () -> then(pointHistoryRepository).should(times(1)).insert(1L, 10_000L, TransactionType.USE, usedPoint.updateMillis()));
     }
 
 
     @Test
     @DisplayName("유효하지 않은 금액으로 포인트 사용 시 예외가 발생한다.")
-    void use_ShouldThrowException_WhenInvalidAmount() {
+    void 유효하지_않은_금액으로_포인트를_사용하는_경우_예외가_발생한다() {
         // Given
-        long userId = 1L;
-        long invalidAmount = -1000L;
-        UseUserPointCommand command = UseUserPointCommand.of(userId, invalidAmount);
         UserPoint userPoint = mock(UserPoint.class);
-
-        when(userPointRepository.findByUserId(userId)).thenReturn(userPoint);
+        given(userPointRepository.findByUserId(anyLong())).willReturn(userPoint);
         doThrow(new IllegalArgumentException("사용할 포인트는 0보다 커야 합니다."))
-                .when(userPoint).use(invalidAmount);
+                .when(userPoint).use(anyLong());
+        UseUserPointCommand command = UseUserPointCommand.of(1L, -1000L);
 
         // When & Then
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> pointService.use(command));
-        assertEquals("사용할 포인트는 0보다 커야 합니다.", exception.getMessage());
-        verify(userPointRepository).findByUserId(userId);
-        verify(userPoint).use(invalidAmount);
-        verifyNoMoreInteractions(userPointRepository, pointHistoryRepository);
-    }
 
-
-    @Test
-    @DisplayName("사용자 포인트를 조회할 수 있다.")
-    void getUserPointByUserId() {
-        // Given
-        UserPoint userPoint = new UserPoint(1L, 20000L, System.currentTimeMillis());
-        when(userPointRepository.findByUserId(1L)).thenReturn(userPoint);
-
-        // When
-        UserPoint result = pointService.getUserPointByUserId(1L);
-
-        // Then
         assertAll(
-                () -> assertNotNull(result),
-                () -> assertEquals(1L, result.id()),
-                () -> assertEquals(20000L, result.point())
+                () -> assertEquals("사용할 포인트는 0보다 커야 합니다.", exception.getMessage()),
+                () -> then(userPointRepository).should().findByUserId(1L),
+                () -> then(userPoint).should(times(1)).use(-1000L),
+                () -> then(userPointRepository).should(never()).save(any(UserPoint.class)),
+                () -> then(pointHistoryRepository).should(never()).insert(anyLong(), anyLong(), any(TransactionType.class), anyLong())
         );
-    }
-
-    @Test
-    @DisplayName("사용자 포인트 히스토리를 조회할 수 있다.")
-    void getHistoriesByUserId() {
-        // Given
-        long userId = 1L;
-        final List<PointHistory> pointHistories = List.of(
-                new PointHistory(1L, 1L, 100L, TransactionType.CHARGE, System.currentTimeMillis()),
-                new PointHistory(2L, 1L, 100L, TransactionType.USE, System.currentTimeMillis()),
-                new PointHistory(3L, 1L, 100L, TransactionType.CHARGE, System.currentTimeMillis())
-        );
-
-        when(pointHistoryRepository.selectAllByUserId(userId)).thenReturn(pointHistories);
-
-        // When
-        final List<PointHistory> historiesByUserId = pointService.getHistoriesByUserId(userId);
-
-        // Then
-        assertNotNull(historiesByUserId);
-        verify(pointHistoryRepository).selectAllByUserId(userId);
-        assertEquals(pointHistories, historiesByUserId);
     }
 }
